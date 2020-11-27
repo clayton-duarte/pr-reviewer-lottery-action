@@ -41,18 +41,22 @@ const core = __importStar(__webpack_require__(186));
 // import { GitHub } from '@actions/github/lib/utils'
 const utils_1 = __webpack_require__(918);
 function run() {
+    var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
-        core.info('start...');
+        // core.debug('start...')
         try {
             // SETUP
-            // const github_token: string = core.getInput('github_token')
-            // core.info(formatMessage(github_token != null, 'github_token exists'))
+            const github_token = core.getInput('github_token');
+            core.debug(utils_1.formatMessage(github_token != null, 'github_token exists'));
             const pushPayload = github.context.payload;
-            core.info(utils_1.formatMessage(pushPayload, 'pushPayload'));
+            const pullId = (_a = pushPayload.pull_request) === null || _a === void 0 ? void 0 : _a.id;
+            core.debug(utils_1.formatMessage(pullId, 'pullId'));
+            const author = (_b = pushPayload.sender) === null || _b === void 0 ? void 0 : _b.login;
+            core.debug(utils_1.formatMessage(author, 'author'));
             // const octokit: InstanceType<typeof GitHub> = github.getOctokit(github_token)
             // const workflowRuns = await octokit.actions.listWorkflowRuns()
-            // core.info(formatMessage(workflowRuns, 'workflowRuns'))
-            core.setOutput('pushPayload', pushPayload);
+            // core.debug(formatMessage(workflowRuns, 'workflowRuns'))
+            core.setOutput('author', author);
         }
         catch (error) {
             core.setFailed(error.message);
@@ -72,7 +76,7 @@ run();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.formatMessage = void 0;
 function formatMessage(obj, message = '>>>') {
-    return `${message}: ${JSON.stringify(obj, null, 2)}`;
+    return `${message}> ${JSON.stringify(obj, null, 2)}`;
 }
 exports.formatMessage = formatMessage;
 
