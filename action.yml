@@ -6,7 +6,7 @@ inputs:
     description: 'secrets.GITHUB_TOKEN'
     required: true
   whatever:
-    description: 'whatever'
+    description: 'whenever'
     default: 'default value if applicable'
     required: false
 outputs:
