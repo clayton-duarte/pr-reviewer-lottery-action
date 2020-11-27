@@ -1,18 +1,25 @@
-import * as core from '@actions/core'
-import {wait} from './wait'
+import {getInput, debug, setOutput, setFailed} from '@actions/core'
+import {WebhookPayload} from '@actions/github/lib/interfaces'
+import {GitHub} from '@actions/github/lib/utils'
+import {getOctokit, context} from '@actions/github'
 
+function formatMessage(obj: unknown, message = '>>>'): string {
+  return `${message}: ${JSON.stringify(obj, null, 2)}`
+}
 async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
+    // SETUP
+    const myToken: string = getInput('myToken')
+    const pushPayload: WebhookPayload = context.payload
+    const octokit: InstanceType<typeof GitHub> = getOctokit(myToken)
+    debug(formatMessage(pushPayload, 'pushPayload'))
 
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+    const workflowRuns = await octokit.actions.listWorkflowRuns()
+    debug(formatMessage(workflowRuns, 'workflowRuns'))
 
-    core.setOutput('time', new Date().toTimeString())
+    setOutput('time', new Date().toTimeString())
   } catch (error) {
-    core.setFailed(error.message)
+    setFailed(error.message)
   }
 }
 

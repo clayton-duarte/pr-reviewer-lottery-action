@@ -1,8 +1,8 @@
 {
-  "name": "typescript-action",
+  "name": "pr-reviewer-lottery-action",
   "version": "0.0.0",
-  "private": true,
-  "description": "TypeScript template action",
+  "private": false,
+  "description": "Github action to randomly assign a recently opened PR to a reviewer from a given group",
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
@@ -13,19 +13,9 @@
     "test": "jest",
     "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/actions/typescript-action.git"
-  },
-  "keywords": [
-    "actions",
-    "node",
-    "setup"
-  ],
-  "author": "",
-  "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.2.6"
+    "@actions/core": "^1.2.6",
+    "@actions/github": "^4.0.0"
   },
   "devDependencies": {
     "@types/jest": "^26.0.15",
@@ -41,5 +31,16 @@
     "prettier": "2.1.1",
     "ts-jest": "^24.3.0",
     "typescript": "^4.0.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clayton-duarte/pr-reviewer-lottery-action.git"
+  },
+  "keywords": [
+    "actions",
+    "setup",
+    "node"
+  ],
+  "author": "clayton-duarte",
+  "license": "MIT"
 }
