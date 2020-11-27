@@ -7,6 +7,25 @@ require('./sourcemap-register.js');module.exports =
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -17,29 +36,45 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core_1 = __webpack_require__(186);
-const github_1 = __webpack_require__(438);
-function formatMessage(obj, message = '>>>') {
-    return `${message}: ${JSON.stringify(obj, null, 2)}`;
-}
+const github = __importStar(__webpack_require__(438));
+const core = __importStar(__webpack_require__(186));
+// import { GitHub } from '@actions/github/lib/utils'
+const utils_1 = __webpack_require__(918);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
+        core.info('start...');
         try {
             // SETUP
-            const myToken = core_1.getInput('myToken');
-            const pushPayload = github_1.context.payload;
-            const octokit = github_1.getOctokit(myToken);
-            core_1.debug(formatMessage(pushPayload, 'pushPayload'));
-            const workflowRuns = yield octokit.actions.listWorkflowRuns();
-            core_1.debug(formatMessage(workflowRuns, 'workflowRuns'));
-            core_1.setOutput('time', new Date().toTimeString());
+            // const github_token: string = core.getInput('github_token')
+            // core.info(formatMessage(github_token != null, 'github_token exists'))
+            const pushPayload = github.context.payload;
+            core.info(utils_1.formatMessage(pushPayload, 'pushPayload'));
+            // const octokit: InstanceType<typeof GitHub> = github.getOctokit(github_token)
+            // const workflowRuns = await octokit.actions.listWorkflowRuns()
+            // core.info(formatMessage(workflowRuns, 'workflowRuns'))
+            core.setOutput('pushPayload', pushPayload);
         }
         catch (error) {
-            core_1.setFailed(error.message);
+            core.setFailed(error.message);
         }
     });
 }
 run();
+
+
+/***/ }),
+
+/***/ 918:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.formatMessage = void 0;
+function formatMessage(obj, message = '>>>') {
+    return `${message}: ${JSON.stringify(obj, null, 2)}`;
+}
+exports.formatMessage = formatMessage;
 
 
 /***/ }),
@@ -57,7 +92,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const os = __importStar(__webpack_require__(87));
+const os = __importStar(__webpack_require__(365));
 const utils_1 = __webpack_require__(278);
 /**
  * Commands
@@ -155,7 +190,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const command_1 = __webpack_require__(351);
 const file_command_1 = __webpack_require__(717);
 const utils_1 = __webpack_require__(278);
-const os = __importStar(__webpack_require__(87));
+const os = __importStar(__webpack_require__(365));
 const path = __importStar(__webpack_require__(622));
 /**
  * The code to exit an action
@@ -392,7 +427,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 // We use any as a valid input type
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const fs = __importStar(__webpack_require__(747));
-const os = __importStar(__webpack_require__(87));
+const os = __importStar(__webpack_require__(365));
 const utils_1 = __webpack_require__(278);
 function issueCommand(command, message) {
     const filePath = process.env[`GITHUB_${command}`];
@@ -437,7 +472,7 @@ exports.toCommandValue = toCommandValue;
 
 /***/ }),
 
-/***/ 53:
+/***/ 87:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
@@ -445,7 +480,7 @@ exports.toCommandValue = toCommandValue;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Context = void 0;
 const fs_1 = __webpack_require__(747);
-const os_1 = __webpack_require__(87);
+const os_1 = __webpack_require__(365);
 class Context {
     /**
      * Hydrate the context from the environment
@@ -520,7 +555,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getOctokit = exports.context = void 0;
-const Context = __importStar(__webpack_require__(53));
+const Context = __importStar(__webpack_require__(87));
 const utils_1 = __webpack_require__(30);
 exports.context = new Context.Context();
 /**
@@ -613,7 +648,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getOctokitOptions = exports.GitHub = exports.context = void 0;
-const Context = __importStar(__webpack_require__(53));
+const Context = __importStar(__webpack_require__(87));
 const Utils = __importStar(__webpack_require__(914));
 // octokit + plugins
 const core_1 = __webpack_require__(762);
@@ -5934,7 +5969,7 @@ module.exports = require("net");;
 
 /***/ }),
 
-/***/ 87:
+/***/ 365:
 /***/ ((module) => {
 
 "use strict";

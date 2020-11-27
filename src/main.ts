@@ -1,25 +1,28 @@
-import {getInput, debug, setOutput, setFailed} from '@actions/core'
-import {WebhookPayload} from '@actions/github/lib/interfaces'
-import {GitHub} from '@actions/github/lib/utils'
-import {getOctokit, context} from '@actions/github'
+import * as github from '@actions/github'
+import * as core from '@actions/core'
 
-function formatMessage(obj: unknown, message = '>>>'): string {
-  return `${message}: ${JSON.stringify(obj, null, 2)}`
-}
+import { WebhookPayload } from '@actions/github/lib/interfaces'
+// import { GitHub } from '@actions/github/lib/utils'
+
+import { formatMessage } from './utils'
+
 async function run(): Promise<void> {
+  core.info('start...')
   try {
     // SETUP
-    const myToken: string = getInput('myToken')
-    const pushPayload: WebhookPayload = context.payload
-    const octokit: InstanceType<typeof GitHub> = getOctokit(myToken)
-    debug(formatMessage(pushPayload, 'pushPayload'))
+    // const github_token: string = core.getInput('github_token')
+    // core.info(formatMessage(github_token != null, 'github_token exists'))
 
-    const workflowRuns = await octokit.actions.listWorkflowRuns()
-    debug(formatMessage(workflowRuns, 'workflowRuns'))
+    const pushPayload: WebhookPayload = github.context.payload
+    core.info(formatMessage(pushPayload, 'pushPayload'))
 
-    setOutput('time', new Date().toTimeString())
+    // const octokit: InstanceType<typeof GitHub> = github.getOctokit(github_token)
+    // const workflowRuns = await octokit.actions.listWorkflowRuns()
+    // core.info(formatMessage(workflowRuns, 'workflowRuns'))
+
+    core.setOutput('pushPayload', pushPayload)
   } catch (error) {
-    setFailed(error.message)
+    core.setFailed(error.message)
   }
 }
 
