@@ -27,4 +27,5 @@ jobs:
       - name: Runs Itself
         uses: ./
         with:
+          possible_reviewers: "clayton-duarte,l0rdcafe"
           github_token: ${{ secrets.GITHUB_TOKEN }}

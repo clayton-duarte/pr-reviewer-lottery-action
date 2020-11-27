@@ -38,29 +38,30 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const github = __importStar(__webpack_require__(438));
 const core = __importStar(__webpack_require__(186));
-// import { GitHub } from '@actions/github/lib/utils'
-const utils_1 = __webpack_require__(918);
+// import { formatMessage } from './utils'
 function run() {
     var _a, _b, _c;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // SETUP
             const github_token = core.getInput('github_token');
-            core.debug(utils_1.formatMessage(github_token != null, 'github_token exists'));
-            const pushPayload = github.context.payload;
-            const pullId = (_a = pushPayload.pull_request) === null || _a === void 0 ? void 0 : _a.id;
-            core.debug(utils_1.formatMessage(pullId, 'pullId'));
-            const owner = ((_b = pushPayload.sender) === null || _b === void 0 ? void 0 : _b.login) || '';
-            core.debug(utils_1.formatMessage(owner, 'owner'));
-            const repo = ((_c = pushPayload.repository) === null || _c === void 0 ? void 0 : _c.name) || '';
-            core.debug(utils_1.formatMessage(repo, 'repo'));
+            const possible_reviewers = core.getInput('possible_reviewers');
             const octokit = github.getOctokit(github_token);
-            const pullRequests = yield octokit.pulls.list({
+            const pushPayload = github.context.payload;
+            const pull_number = ((_a = pushPayload.pull_request) === null || _a === void 0 ? void 0 : _a.number) || 0;
+            const repo = ((_b = pushPayload.repository) === null || _b === void 0 ? void 0 : _b.name) || '';
+            const owner = ((_c = pushPayload.sender) === null || _c === void 0 ? void 0 : _c.login) || '';
+            // ACTION
+            const reviewers_list = possible_reviewers.split(',');
+            const reviewers = reviewers_list.filter((login) => login !== owner);
+            //octokit.github.io/rest.js/v18#pulls-request-reviewers
+            const result = yield octokit.pulls.requestReviewers({
+                pull_number,
+                reviewers,
                 owner,
                 repo
             });
-            core.debug(utils_1.formatMessage(pullRequests, 'pullRequests'));
-            core.setOutput('owner', owner);
+            core.setOutput('result', result);
         }
         catch (error) {
             core.setFailed(error);
@@ -68,21 +69,6 @@ function run() {
     });
 }
 run();
-
-
-/***/ }),
-
-/***/ 918:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.formatMessage = void 0;
-function formatMessage(obj, message = '>>>') {
-    return `${message}> ${JSON.stringify(obj, null, 2)}`;
-}
-exports.formatMessage = formatMessage;
 
 
 /***/ }),
