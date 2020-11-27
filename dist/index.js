@@ -41,9 +41,8 @@ const core = __importStar(__webpack_require__(186));
 // import { GitHub } from '@actions/github/lib/utils'
 const utils_1 = __webpack_require__(918);
 function run() {
-    var _a, _b;
+    var _a, _b, _c;
     return __awaiter(this, void 0, void 0, function* () {
-        // core.debug('start...')
         try {
             // SETUP
             const github_token = core.getInput('github_token');
@@ -51,15 +50,20 @@ function run() {
             const pushPayload = github.context.payload;
             const pullId = (_a = pushPayload.pull_request) === null || _a === void 0 ? void 0 : _a.id;
             core.debug(utils_1.formatMessage(pullId, 'pullId'));
-            const author = (_b = pushPayload.sender) === null || _b === void 0 ? void 0 : _b.login;
-            core.debug(utils_1.formatMessage(author, 'author'));
-            // const octokit: InstanceType<typeof GitHub> = github.getOctokit(github_token)
-            // const workflowRuns = await octokit.actions.listWorkflowRuns()
-            // core.debug(formatMessage(workflowRuns, 'workflowRuns'))
-            core.setOutput('author', author);
+            const owner = ((_b = pushPayload.sender) === null || _b === void 0 ? void 0 : _b.login) || '';
+            core.debug(utils_1.formatMessage(owner, 'owner'));
+            const repo = ((_c = pushPayload.repository) === null || _c === void 0 ? void 0 : _c.name) || '';
+            core.debug(utils_1.formatMessage(repo, 'repo'));
+            const octokit = github.getOctokit(github_token);
+            const pullRequests = yield octokit.pulls.list({
+                owner,
+                repo
+            });
+            core.debug(utils_1.formatMessage(pullRequests, 'pullRequests'));
+            core.setOutput('owner', owner);
         }
         catch (error) {
-            core.setFailed(error.message);
+            core.setFailed(error);
         }
     });
 }

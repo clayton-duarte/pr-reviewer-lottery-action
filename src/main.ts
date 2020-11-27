@@ -7,25 +7,29 @@ import { WebhookPayload } from '@actions/github/lib/interfaces'
 import { formatMessage } from './utils'
 
 async function run(): Promise<void> {
-  // core.debug('start...')
   try {
     // SETUP
     const github_token: string = core.getInput('github_token')
     core.debug(formatMessage(github_token != null, 'github_token exists'))
 
     const pushPayload: WebhookPayload = github.context.payload
-    const pullId = pushPayload.pull_request?.id
+    const pullId: string = pushPayload.pull_request?.id
     core.debug(formatMessage(pullId, 'pullId'))
-    const author = pushPayload.sender?.login
-    core.debug(formatMessage(author, 'author'))
+    const owner: string = pushPayload.sender?.login || ''
+    core.debug(formatMessage(owner, 'owner'))
+    const repo: string = pushPayload.repository?.name || ''
+    core.debug(formatMessage(repo, 'repo'))
 
-    // const octokit: InstanceType<typeof GitHub> = github.getOctokit(github_token)
-    // const workflowRuns = await octokit.actions.listWorkflowRuns()
-    // core.debug(formatMessage(workflowRuns, 'workflowRuns'))
+    const octokit = github.getOctokit(github_token)
+    const pullRequests = await octokit.pulls.list({
+      owner,
+      repo
+    })
+    core.debug(formatMessage(pullRequests, 'pullRequests'))
 
-    core.setOutput('author', author)
+    core.setOutput('owner', owner)
   } catch (error) {
-    core.setFailed(error.message)
+    core.setFailed(error)
   }
 }
 
