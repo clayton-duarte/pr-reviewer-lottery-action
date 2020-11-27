@@ -14,6 +14,8 @@ async function run(): Promise<void> {
     core.debug(formatMessage(github_token != null, 'github_token exists'))
 
     const pushPayload: WebhookPayload = github.context.payload
+    const pullId = pushPayload.pull_request?.id
+    core.debug(formatMessage(pullId, 'pullId'))
     const author = pushPayload.sender?.login
     core.debug(formatMessage(author, 'author'))
 
