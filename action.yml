@@ -1,11 +1,17 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'pr-reviewer-lottery-action'
+description: 'Github action to randomly assign a recently opened PR to a reviewer from a given group'
+author: 'clayton-duarte'
 inputs:
-  milliseconds: # change this
+  github_token:
+    description: 'secrets.GITHUB_TOKEN'
     required: true
-    description: 'input description here'
+  whatever:
+    description: 'whatever'
     default: 'default value if applicable'
+    required: false
+outputs:
+  pushPayload:
+    description: 'testing pushPayload'
 runs:
   using: 'node12'
   main: 'dist/index.js'

@@ -1,18 +1,35 @@
+import * as github from '@actions/github'
 import * as core from '@actions/core'
-import {wait} from './wait'
+
+import { WebhookPayload } from '@actions/github/lib/interfaces'
+// import { GitHub } from '@actions/github/lib/utils'
+
+import { formatMessage } from './utils'
 
 async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
+    // SETUP
+    const github_token: string = core.getInput('github_token')
+    core.debug(formatMessage(github_token != null, 'github_token exists'))
 
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+    const pushPayload: WebhookPayload = github.context.payload
+    const pullId: string = pushPayload.pull_request?.id
+    core.debug(formatMessage(pullId, 'pullId'))
+    const owner: string = pushPayload.sender?.login || ''
+    core.debug(formatMessage(owner, 'owner'))
+    const repo: string = pushPayload.repository?.name || ''
+    core.debug(formatMessage(repo, 'repo'))
 
-    core.setOutput('time', new Date().toTimeString())
+    const octokit = github.getOctokit(github_token)
+    const pullRequests = await octokit.pulls.list({
+      owner,
+      repo
+    })
+    core.debug(formatMessage(pullRequests, 'pullRequests'))
+
+    core.setOutput('owner', owner)
   } catch (error) {
-    core.setFailed(error.message)
+    core.setFailed(error)
   }
 }
 
