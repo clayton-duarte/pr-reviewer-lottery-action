@@ -18,19 +18,14 @@ function filterAuthorFromReviewerList(
 export async function listEligibleReviewers(): Promise<string[]> {
   // SETUP
   const { pull_request, repository }: WebhookPayload = github.context.payload
-  const project_id: number = pull_request?.base?.repo?.id || 0
   const author: string = pull_request?.user?.login || ''
   const owner: string = repository?.owner.login || ''
   const repo = repository?.name || ''
-  core.debug(formatMessage(project_id, 'project_id'))
-  core.debug(formatMessage(repository, 'repository'))
-  core.debug(formatMessage(repo, 'repo'))
 
   // if reviewers param is provided
   const reviewers: string = core.getInput('reviewers')
   if (reviewers) {
     const reviewersList: string[] = reviewers.split(',')
-    core.debug(formatMessage(reviewersList, 'reviewersList'))
     return filterAuthorFromReviewerList(reviewersList, author)
   }
 
@@ -43,6 +38,5 @@ export async function listEligibleReviewers(): Promise<string[]> {
   })
 
   const collaborators = data.map(({ login }) => login)
-  core.debug(formatMessage(collaborators, 'collaborators'))
   return filterAuthorFromReviewerList(collaborators, author)
 }

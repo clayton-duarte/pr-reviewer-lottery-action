@@ -4,7 +4,7 @@ import * as core from '@actions/core'
 import { WebhookPayload } from '@actions/github/lib/interfaces'
 import { GitHub } from '@actions/github/lib/utils'
 
-import { formatMessage, listEligibleReviewers } from './utils'
+import { listEligibleReviewers } from './utils'
 
 async function run(): Promise<void> {
   try {
@@ -13,17 +13,12 @@ async function run(): Promise<void> {
     const octokit: InstanceType<typeof GitHub> = github.getOctokit(github_token)
 
     const { pull_request, repository }: WebhookPayload = github.context.payload
-    const author: string = pull_request?.user?.login || ''
     const pull_number: number = pull_request?.number || 0
     const owner: string = repository?.owner.login || ''
     const repo: string = repository?.name || ''
 
-    core.debug(formatMessage(author, 'author'))
-    core.debug(formatMessage(owner, 'owner'))
-
     // ACTION
     const reviewers = await listEligibleReviewers()
-    core.debug(formatMessage(reviewers, 'reviewers'))
 
     //octokit.github.io/rest.js/v18#pulls-request-reviewers
     const result = await octokit.pulls.requestReviewers({

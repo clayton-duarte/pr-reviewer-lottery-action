@@ -17,16 +17,26 @@ jobs:
       - name: Build and Test
         run: yarn all
           
-  test:
+  test-default:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Runs Itself
-        # ./ stands for the task in the root of this repo
+      - name: Runs default
         uses: ./
         with:
           # if no possible reviewers is passed, we assume that's all collaborators
-          # reviewers: 
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  test-with-reviewers:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Runs with reviewers option
+        uses: ./
+        with:
+          reviewers: 'clayton-duarte,l0rdcafe,ryansmit'
           github_token: ${{ secrets.GITHUB_TOKEN }}
