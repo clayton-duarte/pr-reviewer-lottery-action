@@ -112,20 +112,25 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.listEligibleReviewers = exports.formatMessage = void 0;
 const github = __importStar(__webpack_require__(438));
 const core = __importStar(__webpack_require__(186));
-// import { GitHub } from '@actions/github/lib/utils'
 function formatMessage(obj, message = '>>>') {
-    return `${message}> ${JSON.stringify(obj, null, 2)}`;
+    return `${message} >> ${JSON.stringify(obj, null, 2)}`;
 }
 exports.formatMessage = formatMessage;
 function filterAuthorFromReviewerList(list, author) {
     return list.filter((login) => login !== author);
 }
 function listEligibleReviewers() {
-    var _a;
+    var _a, _b, _c;
     return __awaiter(this, void 0, void 0, function* () {
         // SETUP
-        const { pull_request } = github.context.payload;
-        const author = ((_a = pull_request === null || pull_request === void 0 ? void 0 : pull_request.user) === null || _a === void 0 ? void 0 : _a.login) || '';
+        const { pull_request, repository } = github.context.payload;
+        const project_id = ((_b = (_a = pull_request === null || pull_request === void 0 ? void 0 : pull_request.base) === null || _a === void 0 ? void 0 : _a.repo) === null || _b === void 0 ? void 0 : _b.id) || 0;
+        const author = ((_c = pull_request === null || pull_request === void 0 ? void 0 : pull_request.user) === null || _c === void 0 ? void 0 : _c.login) || '';
+        const owner = (repository === null || repository === void 0 ? void 0 : repository.owner.login) || '';
+        const repo = (repository === null || repository === void 0 ? void 0 : repository.name) || '';
+        core.debug(formatMessage(project_id, 'project_id'));
+        core.debug(formatMessage(repository, 'repository'));
+        core.debug(formatMessage(repo, 'repo'));
         // if reviewers param is provided
         const reviewers = core.getInput('reviewers');
         if (reviewers) {
@@ -134,8 +139,15 @@ function listEligibleReviewers() {
             return filterAuthorFromReviewerList(reviewersList, author);
         }
         // else, retrieve all collaborators
-        core.debug(formatMessage(github.context.payload, 'github.context.payload'));
-        return [];
+        const github_token = core.getInput('github_token');
+        const octokit = github.getOctokit(github_token);
+        const { data } = yield octokit.repos.listCollaborators({
+            owner,
+            repo
+        });
+        const collaborators = data.map(({ login }) => login);
+        core.debug(formatMessage(collaborators, 'collaborators'));
+        return filterAuthorFromReviewerList(collaborators, author);
     });
 }
 exports.listEligibleReviewers = listEligibleReviewers;
