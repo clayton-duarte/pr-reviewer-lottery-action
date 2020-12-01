@@ -5,6 +5,7 @@ inputs:
   github_token:
     description: 'secrets.GITHUB_TOKEN'
     required: true
+
   possible_reviewers:
     description: 'List of Github logins separated by comma. E.g. "clayton-duarte,l0rdcafe"'
     required: false

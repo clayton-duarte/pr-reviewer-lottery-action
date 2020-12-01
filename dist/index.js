@@ -38,22 +38,27 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const github = __importStar(__webpack_require__(438));
 const core = __importStar(__webpack_require__(186));
-// import { formatMessage } from './utils'
+const utils_1 = __webpack_require__(918);
 function run() {
-    var _a, _b, _c;
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // SETUP
             const github_token = core.getInput('github_token');
             const possible_reviewers = core.getInput('possible_reviewers');
             const octokit = github.getOctokit(github_token);
-            const pushPayload = github.context.payload;
-            const pull_number = ((_a = pushPayload.pull_request) === null || _a === void 0 ? void 0 : _a.number) || 0;
-            const repo = ((_b = pushPayload.repository) === null || _b === void 0 ? void 0 : _b.name) || '';
-            const owner = ((_c = pushPayload.sender) === null || _c === void 0 ? void 0 : _c.login) || '';
+            const { pull_request, repository } = github.context.payload;
+            const author = ((_a = pull_request === null || pull_request === void 0 ? void 0 : pull_request.user) === null || _a === void 0 ? void 0 : _a.login) || '';
+            const pull_number = (pull_request === null || pull_request === void 0 ? void 0 : pull_request.number) || 0;
+            const owner = (repository === null || repository === void 0 ? void 0 : repository.owner.login) || '';
+            const repo = (repository === null || repository === void 0 ? void 0 : repository.name) || '';
+            core.debug(utils_1.formatMessage(author, 'author'));
+            core.debug(utils_1.formatMessage(owner, 'owner'));
             // ACTION
             const reviewers_list = possible_reviewers.split(',');
-            const reviewers = reviewers_list.filter((login) => login !== owner);
+            const reviewers = reviewers_list.filter((login) => login !== author);
+            core.debug(utils_1.formatMessage(reviewers_list, 'reviewers_list'));
+            core.debug(utils_1.formatMessage(reviewers, 'reviewers'));
             //octokit.github.io/rest.js/v18#pulls-request-reviewers
             const result = yield octokit.pulls.requestReviewers({
                 pull_number,
@@ -69,6 +74,21 @@ function run() {
     });
 }
 run();
+
+
+/***/ }),
+
+/***/ 918:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.formatMessage = void 0;
+function formatMessage(obj, message = '>>>') {
+    return `${message}> ${JSON.stringify(obj, null, 2)}`;
+}
+exports.formatMessage = formatMessage;
 
 
 /***/ }),
