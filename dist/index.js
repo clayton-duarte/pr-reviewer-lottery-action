@@ -36,28 +36,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const github = __importStar(__webpack_require__(438));
 const core = __importStar(__webpack_require__(186));
 const utils_1 = __webpack_require__(918);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            // SETUP
-            const github_token = core.getInput('github_token');
-            const octokit = github.getOctokit(github_token);
-            const { pull_request, repository } = github.context.payload;
-            const pull_number = (pull_request === null || pull_request === void 0 ? void 0 : pull_request.number) || 0;
-            const owner = (repository === null || repository === void 0 ? void 0 : repository.owner.login) || '';
-            const repo = (repository === null || repository === void 0 ? void 0 : repository.name) || '';
-            // ACTION
-            const reviewers = yield utils_1.listEligibleReviewers();
-            //octokit.github.io/rest.js/v18#pulls-request-reviewers
-            const result = yield octokit.pulls.requestReviewers({
-                pull_number,
-                reviewers,
-                owner,
-                repo
-            });
+            const result = yield utils_1.requestReviewer();
             core.setOutput('result', result);
         }
         catch (error) {
@@ -104,13 +88,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.listEligibleReviewers = exports.formatMessage = void 0;
+exports.requestReviewer = exports.listEligibleReviewers = exports.randomlyReturnReviewer = exports.formatMessage = void 0;
 const github = __importStar(__webpack_require__(438));
 const core = __importStar(__webpack_require__(186));
 function formatMessage(obj, message = '>>>') {
     return `${message} >> ${JSON.stringify(obj, null, 2)}`;
 }
 exports.formatMessage = formatMessage;
+function randomlyReturnReviewer(reviewers) {
+    const randomIndex = Math.floor(Math.random() * reviewers.length);
+    return reviewers[randomIndex];
+}
+exports.randomlyReturnReviewer = randomlyReturnReviewer;
 function filterAuthorFromReviewerList(list, author) {
     return list.filter((login) => login !== author);
 }
@@ -140,6 +129,29 @@ function listEligibleReviewers() {
     });
 }
 exports.listEligibleReviewers = listEligibleReviewers;
+function requestReviewer() {
+    return __awaiter(this, void 0, void 0, function* () {
+        // Setup
+        const { pull_request, repository } = github.context.payload;
+        const pull_number = (pull_request === null || pull_request === void 0 ? void 0 : pull_request.number) || 0;
+        const owner = (repository === null || repository === void 0 ? void 0 : repository.owner.login) || '';
+        const repo = (repository === null || repository === void 0 ? void 0 : repository.name) || '';
+        const github_token = core.getInput('github_token');
+        const octokit = github.getOctokit(github_token);
+        // Selects reviewer
+        const reviewers = yield listEligibleReviewers();
+        const selectedReviewer = randomlyReturnReviewer(reviewers);
+        // Request review
+        const result = yield octokit.pulls.requestReviewers({
+            reviewers: [selectedReviewer],
+            pull_number,
+            owner,
+            repo
+        });
+        return result;
+    });
+}
+exports.requestReviewer = requestReviewer;
 
 
 /***/ }),
@@ -157,7 +169,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const os = __importStar(__webpack_require__(365));
+const os = __importStar(__webpack_require__(87));
 const utils_1 = __webpack_require__(278);
 /**
  * Commands
@@ -255,7 +267,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const command_1 = __webpack_require__(351);
 const file_command_1 = __webpack_require__(717);
 const utils_1 = __webpack_require__(278);
-const os = __importStar(__webpack_require__(365));
+const os = __importStar(__webpack_require__(87));
 const path = __importStar(__webpack_require__(622));
 /**
  * The code to exit an action
@@ -492,7 +504,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 // We use any as a valid input type
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const fs = __importStar(__webpack_require__(747));
-const os = __importStar(__webpack_require__(365));
+const os = __importStar(__webpack_require__(87));
 const utils_1 = __webpack_require__(278);
 function issueCommand(command, message) {
     const filePath = process.env[`GITHUB_${command}`];
@@ -537,7 +549,7 @@ exports.toCommandValue = toCommandValue;
 
 /***/ }),
 
-/***/ 87:
+/***/ 53:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
@@ -545,7 +557,7 @@ exports.toCommandValue = toCommandValue;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Context = void 0;
 const fs_1 = __webpack_require__(747);
-const os_1 = __webpack_require__(365);
+const os_1 = __webpack_require__(87);
 class Context {
     /**
      * Hydrate the context from the environment
@@ -620,7 +632,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getOctokit = exports.context = void 0;
-const Context = __importStar(__webpack_require__(87));
+const Context = __importStar(__webpack_require__(53));
 const utils_1 = __webpack_require__(30);
 exports.context = new Context.Context();
 /**
@@ -713,7 +725,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getOctokitOptions = exports.GitHub = exports.context = void 0;
-const Context = __importStar(__webpack_require__(87));
+const Context = __importStar(__webpack_require__(53));
 const Utils = __importStar(__webpack_require__(914));
 // octokit + plugins
 const core_1 = __webpack_require__(762);
@@ -6034,7 +6046,7 @@ module.exports = require("net");;
 
 /***/ }),
 
-/***/ 365:
+/***/ 87:
 /***/ ((module) => {
 
 "use strict";
