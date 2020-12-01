@@ -1,7 +1,6 @@
 name: 'build-test'
 on:
   pull_request:
-  push:
     branches:
       - main
 
@@ -18,14 +17,26 @@ jobs:
       - name: Build and Test
         run: yarn all
           
-  test:
+  test-default:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Runs Itself
+      - name: Runs default
         uses: ./
         with:
-          possible_reviewers: "clayton-duarte,l0rdcafe"
+          # if no possible reviewers is passed, we assume that's all collaborators
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  test-with-reviewers:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Runs with reviewers option
+        uses: ./
+        with:
+          reviewers: 'clayton-duarte,l0rdcafe,ryansmit'
           github_token: ${{ secrets.GITHUB_TOKEN }}

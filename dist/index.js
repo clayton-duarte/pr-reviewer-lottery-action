@@ -40,25 +40,17 @@ const github = __importStar(__webpack_require__(438));
 const core = __importStar(__webpack_require__(186));
 const utils_1 = __webpack_require__(918);
 function run() {
-    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // SETUP
             const github_token = core.getInput('github_token');
-            const possible_reviewers = core.getInput('possible_reviewers');
             const octokit = github.getOctokit(github_token);
             const { pull_request, repository } = github.context.payload;
-            const author = ((_a = pull_request === null || pull_request === void 0 ? void 0 : pull_request.user) === null || _a === void 0 ? void 0 : _a.login) || '';
             const pull_number = (pull_request === null || pull_request === void 0 ? void 0 : pull_request.number) || 0;
             const owner = (repository === null || repository === void 0 ? void 0 : repository.owner.login) || '';
             const repo = (repository === null || repository === void 0 ? void 0 : repository.name) || '';
-            core.debug(utils_1.formatMessage(author, 'author'));
-            core.debug(utils_1.formatMessage(owner, 'owner'));
             // ACTION
-            const reviewers_list = possible_reviewers.split(',');
-            const reviewers = reviewers_list.filter((login) => login !== author);
-            core.debug(utils_1.formatMessage(reviewers_list, 'reviewers_list'));
-            core.debug(utils_1.formatMessage(reviewers, 'reviewers'));
+            const reviewers = yield utils_1.listEligibleReviewers();
             //octokit.github.io/rest.js/v18#pulls-request-reviewers
             const result = yield octokit.pulls.requestReviewers({
                 pull_number,
@@ -79,16 +71,75 @@ run();
 /***/ }),
 
 /***/ 918:
-/***/ ((__unused_webpack_module, exports) => {
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.formatMessage = void 0;
+exports.listEligibleReviewers = exports.formatMessage = void 0;
+const github = __importStar(__webpack_require__(438));
+const core = __importStar(__webpack_require__(186));
 function formatMessage(obj, message = '>>>') {
-    return `${message}> ${JSON.stringify(obj, null, 2)}`;
+    return `${message} >> ${JSON.stringify(obj, null, 2)}`;
 }
 exports.formatMessage = formatMessage;
+function filterAuthorFromReviewerList(list, author) {
+    return list.filter((login) => login !== author);
+}
+function listEligibleReviewers() {
+    var _a;
+    return __awaiter(this, void 0, void 0, function* () {
+        // SETUP
+        const { pull_request, repository } = github.context.payload;
+        const author = ((_a = pull_request === null || pull_request === void 0 ? void 0 : pull_request.user) === null || _a === void 0 ? void 0 : _a.login) || '';
+        const owner = (repository === null || repository === void 0 ? void 0 : repository.owner.login) || '';
+        const repo = (repository === null || repository === void 0 ? void 0 : repository.name) || '';
+        // if reviewers param is provided
+        const reviewers = core.getInput('reviewers');
+        if (reviewers) {
+            const reviewersList = reviewers.split(',');
+            return filterAuthorFromReviewerList(reviewersList, author);
+        }
+        // else, retrieve all collaborators
+        const github_token = core.getInput('github_token');
+        const octokit = github.getOctokit(github_token);
+        const { data } = yield octokit.repos.listCollaborators({
+            owner,
+            repo
+        });
+        const collaborators = data.map(({ login }) => login);
+        return filterAuthorFromReviewerList(collaborators, author);
+    });
+}
+exports.listEligibleReviewers = listEligibleReviewers;
 
 
 /***/ }),
