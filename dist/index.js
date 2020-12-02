@@ -7,25 +7,6 @@ require('./sourcemap-register.js');module.exports =
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -36,16 +17,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__webpack_require__(186));
+const core_1 = __webpack_require__(186);
 const utils_1 = __webpack_require__(918);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const result = yield utils_1.requestReviewer();
-            core.setOutput('result', result);
+            core_1.setOutput('result', result);
         }
         catch (error) {
-            core.setFailed(error);
+            core_1.setFailed(error);
         }
     });
 }
@@ -59,25 +40,6 @@ run();
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -89,8 +51,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.requestReviewer = exports.listEligibleReviewers = exports.randomlyReturnReviewer = exports.formatMessage = void 0;
-const github = __importStar(__webpack_require__(438));
-const core = __importStar(__webpack_require__(186));
+const github_1 = __webpack_require__(438);
+const core_1 = __webpack_require__(186);
 function formatMessage(obj, message = '>>>') {
     return `${message} >> ${JSON.stringify(obj, null, 2)}`;
 }
@@ -107,19 +69,19 @@ function listEligibleReviewers() {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         // SETUP
-        const { pull_request, repository } = github.context.payload;
+        const { pull_request, repository } = github_1.context.payload;
         const author = ((_a = pull_request === null || pull_request === void 0 ? void 0 : pull_request.user) === null || _a === void 0 ? void 0 : _a.login) || '';
         const owner = (repository === null || repository === void 0 ? void 0 : repository.owner.login) || '';
         const repo = (repository === null || repository === void 0 ? void 0 : repository.name) || '';
         // if reviewers param is provided
-        const reviewers = core.getInput('reviewers');
+        const reviewers = core_1.getInput('reviewers');
         if (reviewers) {
             const reviewersList = reviewers.split(',');
             return filterAuthorFromReviewerList(reviewersList, author);
         }
         // else, retrieve all collaborators
-        const github_token = core.getInput('github_token');
-        const octokit = github.getOctokit(github_token);
+        const githubToken = core_1.getInput('github_token');
+        const octokit = github_1.getOctokit(githubToken);
         const { data } = yield octokit.repos.listCollaborators({
             owner,
             repo
@@ -132,12 +94,12 @@ exports.listEligibleReviewers = listEligibleReviewers;
 function requestReviewer() {
     return __awaiter(this, void 0, void 0, function* () {
         // Setup
-        const { pull_request, repository } = github.context.payload;
+        const { pull_request, repository } = github_1.context.payload;
         const pull_number = (pull_request === null || pull_request === void 0 ? void 0 : pull_request.number) || 0;
         const owner = (repository === null || repository === void 0 ? void 0 : repository.owner.login) || '';
         const repo = (repository === null || repository === void 0 ? void 0 : repository.name) || '';
-        const github_token = core.getInput('github_token');
-        const octokit = github.getOctokit(github_token);
+        const github_token = core_1.getInput('github_token');
+        const octokit = github_1.getOctokit(github_token);
         // Selects reviewer
         const reviewers = yield listEligibleReviewers();
         const selectedReviewer = randomlyReturnReviewer(reviewers);

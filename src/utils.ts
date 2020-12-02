@@ -1,5 +1,5 @@
-import * as github from '@actions/github'
-import * as core from '@actions/core'
+import { context, getOctokit } from '@actions/github'
+import { getInput } from '@actions/core'
 
 import { WebhookPayload } from '@actions/github/lib/interfaces'
 import { GitHub } from '@actions/github/lib/utils'
@@ -22,21 +22,21 @@ function filterAuthorFromReviewerList(
 
 export async function listEligibleReviewers(): Promise<string[]> {
   // SETUP
-  const { pull_request, repository }: WebhookPayload = github.context.payload
+  const { pull_request, repository }: WebhookPayload = context.payload
   const author: string = pull_request?.user?.login || ''
   const owner: string = repository?.owner.login || ''
   const repo = repository?.name || ''
 
   // if reviewers param is provided
-  const reviewers: string = core.getInput('reviewers')
+  const reviewers: string = getInput('reviewers')
   if (reviewers) {
     const reviewersList: string[] = reviewers.split(',')
     return filterAuthorFromReviewerList(reviewersList, author)
   }
 
   // else, retrieve all collaborators
-  const github_token: string = core.getInput('github_token')
-  const octokit: InstanceType<typeof GitHub> = github.getOctokit(github_token)
+  const githubToken: string = getInput('github_token')
+  const octokit: InstanceType<typeof GitHub> = getOctokit(githubToken)
   const { data } = await octokit.repos.listCollaborators({
     owner,
     repo
@@ -48,13 +48,13 @@ export async function listEligibleReviewers(): Promise<string[]> {
 
 export async function requestReviewer(): Promise<unknown> {
   // Setup
-  const { pull_request, repository }: WebhookPayload = github.context.payload
+  const { pull_request, repository }: WebhookPayload = context.payload
   const pull_number: number = pull_request?.number || 0
   const owner: string = repository?.owner.login || ''
   const repo: string = repository?.name || ''
 
-  const github_token: string = core.getInput('github_token')
-  const octokit: InstanceType<typeof GitHub> = github.getOctokit(github_token)
+  const github_token: string = getInput('github_token')
+  const octokit: InstanceType<typeof GitHub> = getOctokit(github_token)
 
   // Selects reviewer
   const reviewers = await listEligibleReviewers()
