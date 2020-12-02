@@ -70,8 +70,8 @@ function listEligibleReviewers() {
     return __awaiter(this, void 0, void 0, function* () {
         // SETUP
         const { pull_request, repository } = github_1.context.payload;
-        const owner = (repository === null || repository === void 0 ? void 0 : repository.owner.login) || '';
         const author = ((_a = pull_request === null || pull_request === void 0 ? void 0 : pull_request.user) === null || _a === void 0 ? void 0 : _a.login) || '';
+        const owner = (repository === null || repository === void 0 ? void 0 : repository.owner.login) || '';
         const repo = (repository === null || repository === void 0 ? void 0 : repository.name) || '';
         // if reviewers param is provided
         const reviewers = core_1.getInput('reviewers');

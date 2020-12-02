@@ -8,6 +8,7 @@
     "build": "tsc",
     "lint": "eslint src/**/*.ts",
     "package": "ncc build --source-map --license licenses.txt",
+    "verify": "yarn tsc && yarn lint && yarn package && yarn test",
     "test": "jest"
   },
   "dependencies": {
