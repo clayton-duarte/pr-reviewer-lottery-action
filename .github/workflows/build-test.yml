@@ -14,8 +14,17 @@ jobs:
       - name: Install
         run: yarn
 
-      - name: Build and Test
-        run: yarn all
+      - name: Build
+        run: yarn build
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Compile
+        run: yarn package
+
+      - name: Test
+        run: yarn test
           
   test-default:
     runs-on: ubuntu-latest

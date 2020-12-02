@@ -1,13 +1,13 @@
-import * as core from '@actions/core'
+import { setOutput, setFailed } from '@actions/core'
 
 import { requestReviewer } from './utils'
 
 async function run(): Promise<void> {
   try {
     const result = await requestReviewer()
-    core.setOutput('result', result)
+    setOutput('result', result)
   } catch (error) {
-    core.setFailed(error)
+    setFailed(error)
   }
 }
 
