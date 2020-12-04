@@ -1,13 +1,11 @@
 import { setOutput, setFailed } from '@actions/core'
 
-import { requestReviewer, clearReviewers } from './utils'
+import { requestReviewer } from './utils'
 
 async function run(): Promise<void> {
   try {
-    const clearResult = await clearReviewers()
-    setOutput('clearResult', clearResult)
-    const requestResult = await requestReviewer()
-    setOutput('requestResult', requestResult)
+    const requestReviewersResult: unknown = await requestReviewer()
+    setOutput('requestReviewersResult', requestReviewersResult)
   } catch (error) {
     setFailed(error)
   }

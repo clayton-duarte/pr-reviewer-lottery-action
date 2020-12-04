@@ -91,12 +91,19 @@ export async function requestReviewer(): Promise<unknown> {
   const selectedReviewer = randomlyReturnReviewer(reviewers)
 
   // Request review
-  const result = await octokit.pulls.requestReviewers({
-    reviewers: [selectedReviewer],
-    pull_number,
-    owner,
-    repo
-  })
+  if (selectedReviewer) {
+    await clearReviewers()
 
-  return result
+    const result = await octokit.pulls.requestReviewers({
+      reviewers: [selectedReviewer],
+      pull_number,
+      owner,
+      repo
+    })
+
+    return result
+  }
+
+  // No reviewer found
+  return `no eligible reviewer at ${reviewers}`
 }

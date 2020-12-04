@@ -22,10 +22,8 @@ const utils_1 = __webpack_require__(918);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const clearResult = yield utils_1.clearReviewers();
-            core_1.setOutput('clearResult', clearResult);
-            const requestResult = yield utils_1.requestReviewer();
-            core_1.setOutput('requestResult', requestResult);
+            const requestReviewersResult = yield utils_1.requestReviewer();
+            core_1.setOutput('requestReviewersResult', requestReviewersResult);
         }
         catch (error) {
             core_1.setFailed(error);
@@ -133,13 +131,18 @@ function requestReviewer() {
         const reviewers = yield listEligibleReviewers();
         const selectedReviewer = randomlyReturnReviewer(reviewers);
         // Request review
-        const result = yield octokit.pulls.requestReviewers({
-            reviewers: [selectedReviewer],
-            pull_number,
-            owner,
-            repo
-        });
-        return result;
+        if (selectedReviewer) {
+            yield clearReviewers();
+            const result = yield octokit.pulls.requestReviewers({
+                reviewers: [selectedReviewer],
+                pull_number,
+                owner,
+                repo
+            });
+            return result;
+        }
+        // No reviewer found
+        return `no eligible reviewer at ${reviewers}`;
     });
 }
 exports.requestReviewer = requestReviewer;
