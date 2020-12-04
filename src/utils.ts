@@ -46,6 +46,36 @@ export async function listEligibleReviewers(): Promise<string[]> {
   return filterAuthorFromReviewerList(collaborators, author)
 }
 
+export async function clearReviewers(): Promise<unknown> {
+  // Setup
+  const { pull_request, repository }: WebhookPayload = context.payload
+  const pull_number: number = pull_request?.number || 0
+  const owner: string = repository?.owner.login || ''
+  const repo: string = repository?.name || ''
+
+  const github_token: string = getInput('github_token')
+  const octokit: InstanceType<typeof GitHub> = getOctokit(github_token)
+
+  // List reviewers
+  const { data } = await octokit.pulls.listRequestedReviewers({
+    pull_number,
+    owner,
+    repo
+  })
+
+  const reviewersToRemove = data.users.map(({ login }) => login)
+
+  // Remove reviewers
+  const result = await octokit.pulls.removeRequestedReviewers({
+    reviewers: reviewersToRemove,
+    pull_number,
+    owner,
+    repo
+  })
+
+  return result
+}
+
 export async function requestReviewer(): Promise<unknown> {
   // Setup
   const { pull_request, repository }: WebhookPayload = context.payload
