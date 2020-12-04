@@ -22,8 +22,8 @@ const utils_1 = __webpack_require__(918);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const result = yield utils_1.requestReviewer();
-            core_1.setOutput('result', result);
+            const requestReviewersResult = yield utils_1.requestReviewer();
+            core_1.setOutput('requestReviewersResult', requestReviewersResult);
         }
         catch (error) {
             core_1.setFailed(error);
@@ -50,7 +50,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.requestReviewer = exports.listEligibleReviewers = exports.randomlyReturnReviewer = exports.formatMessage = void 0;
+exports.requestReviewer = exports.clearReviewers = exports.listEligibleReviewers = exports.randomlyReturnReviewer = exports.formatMessage = void 0;
 const github_1 = __webpack_require__(438);
 const core_1 = __webpack_require__(186);
 function formatMessage(obj, message = '>>>') {
@@ -91,6 +91,33 @@ function listEligibleReviewers() {
     });
 }
 exports.listEligibleReviewers = listEligibleReviewers;
+function clearReviewers() {
+    return __awaiter(this, void 0, void 0, function* () {
+        // Setup
+        const { pull_request, repository } = github_1.context.payload;
+        const pull_number = (pull_request === null || pull_request === void 0 ? void 0 : pull_request.number) || 0;
+        const owner = (repository === null || repository === void 0 ? void 0 : repository.owner.login) || '';
+        const repo = (repository === null || repository === void 0 ? void 0 : repository.name) || '';
+        const github_token = core_1.getInput('github_token');
+        const octokit = github_1.getOctokit(github_token);
+        // List reviewers
+        const { data } = yield octokit.pulls.listRequestedReviewers({
+            pull_number,
+            owner,
+            repo
+        });
+        const reviewersToRemove = data.users.map(({ login }) => login);
+        // Remove reviewers
+        const result = yield octokit.pulls.removeRequestedReviewers({
+            reviewers: reviewersToRemove,
+            pull_number,
+            owner,
+            repo
+        });
+        return result;
+    });
+}
+exports.clearReviewers = clearReviewers;
 function requestReviewer() {
     return __awaiter(this, void 0, void 0, function* () {
         // Setup
@@ -104,13 +131,18 @@ function requestReviewer() {
         const reviewers = yield listEligibleReviewers();
         const selectedReviewer = randomlyReturnReviewer(reviewers);
         // Request review
-        const result = yield octokit.pulls.requestReviewers({
-            reviewers: [selectedReviewer],
-            pull_number,
-            owner,
-            repo
-        });
-        return result;
+        if (selectedReviewer) {
+            yield clearReviewers();
+            const result = yield octokit.pulls.requestReviewers({
+                reviewers: [selectedReviewer],
+                pull_number,
+                owner,
+                repo
+            });
+            return result;
+        }
+        // No reviewer found
+        return `no eligible reviewer at ${reviewers}`;
     });
 }
 exports.requestReviewer = requestReviewer;

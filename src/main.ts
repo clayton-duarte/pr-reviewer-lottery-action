@@ -4,8 +4,8 @@ import { requestReviewer } from './utils'
 
 async function run(): Promise<void> {
   try {
-    const result = await requestReviewer()
-    setOutput('result', result)
+    const requestReviewersResult: unknown = await requestReviewer()
+    setOutput('requestReviewersResult', requestReviewersResult)
   } catch (error) {
     setFailed(error)
   }
