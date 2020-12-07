@@ -8,7 +8,7 @@ async function run(): Promise<void> {
 
     if (previouslyRequestedReviewers.length < 1) {
       // No reviewers yet, assign one
-      const requestedNewReviewer: unknown = await requestNewReviewer()
+      const requestedNewReviewer = await requestNewReviewer()
       setOutput('requestedNewReviewer', requestedNewReviewer)
     }
 
