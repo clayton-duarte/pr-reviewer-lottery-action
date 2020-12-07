@@ -22,8 +22,14 @@ const utils_1 = __webpack_require__(918);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const requestReviewersResult = yield utils_1.requestReviewer();
-            core_1.setOutput('requestReviewersResult', requestReviewersResult);
+            const previouslyRequestedReviewers = yield utils_1.listRequestedReviewers();
+            if (previouslyRequestedReviewers.length < 1) {
+                // No reviewers yet, assign one
+                const requestedNewReviewer = yield utils_1.requestNewReviewer();
+                core_1.setOutput('requestedNewReviewer', requestedNewReviewer);
+            }
+            // Reviewer already assigned, do nothing
+            core_1.setOutput('previouslyRequestedReviewers', previouslyRequestedReviewers);
         }
         catch (error) {
             core_1.setFailed(error);
@@ -50,7 +56,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.requestReviewer = exports.clearReviewers = exports.listEligibleReviewers = exports.randomlyReturnReviewer = exports.formatMessage = void 0;
+exports.requestNewReviewer = exports.listRequestedReviewers = exports.listEligibleReviewers = exports.randomlyReturnReviewer = exports.formatMessage = void 0;
 const github_1 = __webpack_require__(438);
 const core_1 = __webpack_require__(186);
 function formatMessage(obj, message = '>>>') {
@@ -91,7 +97,7 @@ function listEligibleReviewers() {
     });
 }
 exports.listEligibleReviewers = listEligibleReviewers;
-function clearReviewers() {
+function listRequestedReviewers() {
     return __awaiter(this, void 0, void 0, function* () {
         // Setup
         const { pull_request, repository } = github_1.context.payload;
@@ -101,24 +107,16 @@ function clearReviewers() {
         const github_token = core_1.getInput('github_token');
         const octokit = github_1.getOctokit(github_token);
         // List reviewers
-        const { data } = yield octokit.pulls.listRequestedReviewers({
+        const { data: { users } } = yield octokit.pulls.listRequestedReviewers({
             pull_number,
             owner,
             repo
         });
-        const reviewersToRemove = data.users.map(({ login }) => login);
-        // Remove reviewers
-        const result = yield octokit.pulls.removeRequestedReviewers({
-            reviewers: reviewersToRemove,
-            pull_number,
-            owner,
-            repo
-        });
-        return result;
+        return users;
     });
 }
-exports.clearReviewers = clearReviewers;
-function requestReviewer() {
+exports.listRequestedReviewers = listRequestedReviewers;
+function requestNewReviewer() {
     return __awaiter(this, void 0, void 0, function* () {
         // Setup
         const { pull_request, repository } = github_1.context.payload;
@@ -132,20 +130,19 @@ function requestReviewer() {
         const selectedReviewer = randomlyReturnReviewer(reviewers);
         // Request review
         if (selectedReviewer) {
-            yield clearReviewers();
-            const result = yield octokit.pulls.requestReviewers({
+            const { data: { requested_reviewers } } = yield octokit.pulls.requestReviewers({
                 reviewers: [selectedReviewer],
                 pull_number,
                 owner,
                 repo
             });
-            return result;
+            return requested_reviewers;
         }
         // No reviewer found
         return `no eligible reviewer at ${reviewers}`;
     });
 }
-exports.requestReviewer = requestReviewer;
+exports.requestNewReviewer = requestNewReviewer;
 
 
 /***/ }),

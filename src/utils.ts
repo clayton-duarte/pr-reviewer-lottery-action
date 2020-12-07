@@ -46,7 +46,7 @@ export async function listEligibleReviewers(): Promise<string[]> {
   return filterAuthorFromReviewerList(collaborators, author)
 }
 
-export async function clearReviewers(): Promise<unknown> {
+export async function listRequestedReviewers(): Promise<unknown[]> {
   // Setup
   const { pull_request, repository }: WebhookPayload = context.payload
   const pull_number: number = pull_request?.number || 0
@@ -57,26 +57,18 @@ export async function clearReviewers(): Promise<unknown> {
   const octokit: InstanceType<typeof GitHub> = getOctokit(github_token)
 
   // List reviewers
-  const { data } = await octokit.pulls.listRequestedReviewers({
+  const {
+    data: { users }
+  } = await octokit.pulls.listRequestedReviewers({
     pull_number,
     owner,
     repo
   })
 
-  const reviewersToRemove = data.users.map(({ login }) => login)
-
-  // Remove reviewers
-  const result = await octokit.pulls.removeRequestedReviewers({
-    reviewers: reviewersToRemove,
-    pull_number,
-    owner,
-    repo
-  })
-
-  return result
+  return users
 }
 
-export async function requestReviewer(): Promise<unknown> {
+export async function requestNewReviewer(): Promise<unknown> {
   // Setup
   const { pull_request, repository }: WebhookPayload = context.payload
   const pull_number: number = pull_request?.number || 0
@@ -92,16 +84,16 @@ export async function requestReviewer(): Promise<unknown> {
 
   // Request review
   if (selectedReviewer) {
-    await clearReviewers()
-
-    const result = await octokit.pulls.requestReviewers({
+    const {
+      data: { requested_reviewers }
+    } = await octokit.pulls.requestReviewers({
       reviewers: [selectedReviewer],
       pull_number,
       owner,
       repo
     })
 
-    return result
+    return requested_reviewers
   }
 
   // No reviewer found
